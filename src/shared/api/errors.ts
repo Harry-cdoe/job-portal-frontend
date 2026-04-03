@@ -26,3 +26,22 @@ export function toApiClientError(error: unknown): ApiClientError {
 
   return new ApiClientError("Unknown error");
 }
+
+export function getApiErrorMessage(error: unknown, fallback = "Request failed") {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as ApiErrorResponse | undefined;
+    const firstValidation = data?.errors?.[0];
+
+    if (firstValidation?.message) {
+      return firstValidation.path ? `${firstValidation.path}: ${firstValidation.message}` : firstValidation.message;
+    }
+
+    return data?.message ?? fallback;
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}

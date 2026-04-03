@@ -5,8 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type SignupSchema } from "../schema";
 import { useSignup } from "../hooks/useSignup";
+import { getApiErrorMessage } from "@/shared/api/errors";
 import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
+import { Spinner } from "@/shared/ui/Spinner";
 
 export function SignupForm() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export function SignupForm() {
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    if (isPending) return;
     await mutateAsync(values);
     router.replace("/login");
   });
@@ -51,10 +54,17 @@ export function SignupForm() {
         </select>
       </div>
 
-      {error ? <p className="text-xs text-red-600">Signup failed. Try with a different email.</p> : null}
+      {error ? <p className="text-xs text-red-600">{getApiErrorMessage(error, "Signup failed")}</p> : null}
 
       <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? "Creating account..." : "Sign up"}
+        {isPending ? (
+          <span className="inline-flex items-center gap-2">
+            <Spinner />
+            Creating account...
+          </span>
+        ) : (
+          "Sign up"
+        )}
       </Button>
     </form>
   );

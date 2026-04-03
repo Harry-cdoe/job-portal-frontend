@@ -11,6 +11,7 @@ import { Button } from "@/shared/ui/Button";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { useApplyJob } from "@/features/applications/hooks/useApplyJob";
+import { Spinner } from "@/shared/ui/Spinner";
 
 export default function JobsPage() {
   const [search, setSearch] = useState("");
@@ -53,7 +54,14 @@ export default function JobsPage() {
             job={job}
             action={
               <Button className="px-3 py-1 text-xs" disabled={isApplying} onClick={() => apply({ jobId: job.id })}>
-                Apply
+                {isApplying ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Spinner className="h-3 w-3 border-[1.5px]" />
+                    Applying...
+                  </span>
+                ) : (
+                  "Apply"
+                )}
               </Button>
             }
           />

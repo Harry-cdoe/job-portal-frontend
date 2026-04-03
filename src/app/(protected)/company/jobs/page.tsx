@@ -7,12 +7,15 @@ import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { Spinner } from "@/shared/ui/Spinner";
 
 export default function CompanyJobsPage() {
   const { mutateAsync, isPending, isError } = useCreateJob();
   const { register, handleSubmit, reset } = useForm<CreateJobRequestDto>();
 
   const onSubmit = handleSubmit(async (values) => {
+    if (isPending) return;
+
     await mutateAsync({
       ...values,
       salary: Number(values.salary),
@@ -38,7 +41,14 @@ export default function CompanyJobsPage() {
         ) : null}
 
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Job"}
+          {isPending ? (
+            <span className="inline-flex items-center gap-2">
+              <Spinner />
+              Posting job...
+            </span>
+          ) : (
+            "Create Job"
+          )}
         </Button>
       </form>
     </section>

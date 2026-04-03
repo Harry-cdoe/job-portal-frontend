@@ -1,14 +1,23 @@
-﻿import axios from "axios";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { http } from "./http";
 import { env } from "@/shared/lib/env";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
 let isRefreshing = false;
 let pendingQueue: Array<(token: string | null) => void> = [];
+let sessionExpiredNotified = false;
 
 function processQueue(token: string | null) {
   pendingQueue.forEach((cb) => cb(token));
   pendingQueue = [];
+}
+
+function redirectToLogin() {
+  if (typeof window === "undefined") return;
+
+  const nextPath = `${window.location.pathname}${window.location.search}` || "/";
+  window.location.replace(`/login?next=${encodeURIComponent(nextPath)}`);
 }
 
 export function setupInterceptors() {
@@ -23,6 +32,10 @@ export function setupInterceptors() {
   const resId = http.interceptors.response.use(
     (response) => response,
     async (error) => {
+      if (axios.isAxiosError(error) && !error.response && error.code !== "ERR_CANCELED") {
+        toast.error("Server not reachable");
+      }
+
       const originalRequest = error.config as { _retry?: boolean; headers: Record<string, string> };
 
       if (error.response?.status !== 401 || originalRequest?._retry) {
@@ -61,6 +74,11 @@ export function setupInterceptors() {
       } catch (refreshError) {
         useAuthStore.getState().clearSession();
         processQueue(null);
+        if (!sessionExpiredNotified) {
+          sessionExpiredNotified = true;
+          toast.error("Session expired");
+        }
+        redirectToLogin();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -69,6 +87,7 @@ export function setupInterceptors() {
   );
 
   return () => {
+    sessionExpiredNotified = false;
     http.interceptors.request.eject(reqId);
     http.interceptors.response.eject(resId);
   };

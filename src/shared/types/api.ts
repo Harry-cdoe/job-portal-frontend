@@ -1,6 +1,10 @@
 export type ApiErrorResponse = {
   code?: string;
   message: string;
+  errors?: Array<{
+    path?: string;
+    message?: string;
+  }>;
 };
 
 export type PaginatedListResponse<T> = {
