@@ -1,22 +1,39 @@
-﻿"use client";
+"use client";
 
+import { useCallback } from "react";
+import { ApplicationCard, ApplicationCardSkeleton } from "@/features/applications/components/ApplicationCard";
 import { useApplications } from "@/features/applications/hooks/useApplications";
 import { useUpdateApplicationStatus } from "@/features/applications/hooks/useUpdateApplicationStatus";
-import { ApplicationStatusBadge } from "@/features/applications/components/ApplicationStatusBadge";
-import { Button } from "@/shared/ui/Button";
+import type { ApplicationPipelineStatus } from "@/features/applications/types";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { PageHeader } from "@/shared/ui/PageHeader";
 
 export default function CompanyApplicationsPage() {
   const { data, isLoading, isError, refetch } = useApplications("company");
-  const { mutate, isPending } = useUpdateApplicationStatus();
+  const { mutate, isPending, variables } = useUpdateApplicationStatus();
+
+  const handleStatusUpdate = useCallback(
+    (payload: { id: number; nextStatus: ApplicationPipelineStatus; expectedCurrentStatus: ApplicationPipelineStatus }) =>
+      mutate({
+        id: payload.id,
+        status: payload.nextStatus,
+        expectedCurrentStatus: payload.expectedCurrentStatus,
+      }),
+    [mutate]
+  );
 
   return (
     <section>
       <PageHeader title="Incoming Applications" subtitle="Review candidates and update decisions quickly." />
 
-      {isLoading ? <p className="text-sm text-slate-600">Loading applications...</p> : null}
+      {isLoading ? (
+        <div className="space-y-3">
+          <ApplicationCardSkeleton />
+          <ApplicationCardSkeleton />
+        </div>
+      ) : null}
+
       {isError ? <ErrorState title="Unable to load applications" onRetry={() => refetch()} /> : null}
 
       {!isLoading && !isError && (data?.length ?? 0) === 0 ? (
@@ -25,35 +42,13 @@ export default function CompanyApplicationsPage() {
 
       <div className="space-y-3">
         {data?.map((app) => (
-          <article key={app.id} className="card p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="font-medium">{app.Job.title}</h2>
-                <p className="text-xs text-slate-500">{app.User.name} ({app.User.email})</p>
-                <p className="text-xs text-slate-500">{app.Job.location}</p>
-              </div>
-
-              <div className="flex flex-col items-end gap-2">
-                <ApplicationStatusBadge status={app.status} />
-                <div className="flex gap-2">
-                  <Button
-                    className="px-3 py-1 text-xs"
-                    disabled={isPending || app.status !== "pending"}
-                    onClick={() => mutate({ id: app.id, status: "accepted" })}
-                  >
-                    Accept
-                  </Button>
-                  <Button
-                    className="bg-red-600 px-3 py-1 text-xs hover:bg-red-700"
-                    disabled={isPending || app.status !== "pending"}
-                    onClick={() => mutate({ id: app.id, status: "rejected" })}
-                  >
-                    Reject
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </article>
+          <ApplicationCard
+            key={app.id}
+            application={app}
+            view="company"
+            isUpdating={isPending && variables?.id === app.id}
+            onUpdateStatus={handleStatusUpdate}
+          />
         ))}
       </div>
     </section>

@@ -1,5 +1,7 @@
 import { http } from "@/shared/api/http";
 import type {
+  ApplicationHistoryItemDto,
+  ApplicationHistoryResponseDto,
   ApplyToJobRequestDto,
   ApplyToJobResponseDto,
   CandidateApplicationsResponseDto,
@@ -32,4 +34,20 @@ export async function updateApplicationStatus(
     payload
   );
   return data;
+}
+
+export async function fetchApplicationHistory(applicationId: number) {
+  const { data } = await http.get<ApplicationHistoryResponseDto>(`/applications/${applicationId}/history`);
+
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  const history =
+    data.history ??
+    data.statusHistory ??
+    data.timeline ??
+    ([] as ApplicationHistoryItemDto[]);
+
+  return history;
 }

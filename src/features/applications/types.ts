@@ -1,13 +1,45 @@
-export type ApplicationStatus = "pending" | "accepted" | "rejected";
+export type ApplicationPipelineStatus =
+  | "applied"
+  | "under_review"
+  | "shortlisted"
+  | "rejected"
+  | "hired";
+
+export type LegacyApplicationStatus = "pending" | "accepted" | "rejected";
+export type ApplicationStatus = ApplicationPipelineStatus | LegacyApplicationStatus;
 export type ApplicationView = "candidate" | "company";
 
-export type CandidateApplicationDto = {
+export type ApplicationHistoryActor = {
+  id?: number;
+  name?: string;
+  email?: string;
+};
+
+export type ApplicationHistoryItemDto = {
+  id?: number;
+  fromStatus?: ApplicationStatus | null;
+  toStatus: ApplicationStatus;
+  changedBy?: ApplicationHistoryActor | string | null;
+  changedAt?: string;
+  createdAt?: string;
+  timestamp?: string;
+  notes?: string | null;
+};
+
+export type ApplicationBaseDto = {
   id: number;
   userId: number;
   jobId: number;
   status: ApplicationStatus;
   createdAt?: string;
   updatedAt?: string;
+  notes?: string | null;
+  recruiterNotes?: string | null;
+  validTransitions?: ApplicationStatus[];
+  statusHistory?: ApplicationHistoryItemDto[];
+};
+
+export type CandidateApplicationDto = ApplicationBaseDto & {
   Job: {
     title: string;
     Company?: {
@@ -16,13 +48,7 @@ export type CandidateApplicationDto = {
   };
 };
 
-export type CompanyApplicationDto = {
-  id: number;
-  userId: number;
-  jobId: number;
-  status: ApplicationStatus;
-  createdAt?: string;
-  updatedAt?: string;
+export type CompanyApplicationDto = ApplicationBaseDto & {
   Job: {
     id: number;
     title: string;
@@ -58,11 +84,22 @@ export type CompanyApplicationsResponseDto = {
   applications: CompanyApplicationDto[];
 };
 
+export type ApplicationHistoryResponseDto =
+  | {
+      history?: ApplicationHistoryItemDto[];
+      statusHistory?: ApplicationHistoryItemDto[];
+      timeline?: ApplicationHistoryItemDto[];
+    }
+  | ApplicationHistoryItemDto[];
+
 export type UpdateApplicationStatusRequestDto = {
-  status: "accepted" | "rejected";
+  status: ApplicationPipelineStatus;
+  notes?: string;
+  expectedCurrentStatus?: ApplicationPipelineStatus;
 };
 
 export type UpdateApplicationStatusResponseDto = {
   message: string;
   application: CompanyApplicationDto;
+  idempotent?: boolean;
 };

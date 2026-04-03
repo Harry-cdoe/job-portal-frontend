@@ -10,6 +10,8 @@ export function useApplications(view: "candidate" | "company") {
     queryKey: queryKeys.applications.list(view),
     queryFn: () => (view === "candidate" ? fetchCandidateApplications() : fetchCompanyApplications()),
     staleTime: 20_000,
+    gcTime: 5 * 60_000,
+    placeholderData: (previousData) => previousData,
     refetchOnWindowFocus: true,
   });
 }

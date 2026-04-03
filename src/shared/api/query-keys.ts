@@ -11,6 +11,7 @@ export const queryKeys = {
   },
   applications: {
     list: (view: ApplicationView) => ["applications", "list", view] as const,
+    history: (applicationId: number) => ["applications", "history", applicationId] as const,
   },
   dashboard: {
     candidate: ["dashboard", "candidate"] as const,
