@@ -17,4 +17,8 @@ export const queryKeys = {
     candidate: ["dashboard", "candidate"] as const,
     company: ["dashboard", "company"] as const,
   },
+  profile: {
+    me: ["profile", "me"] as const,
+    resume: ["profile", "resume"] as const,
+  },
 };

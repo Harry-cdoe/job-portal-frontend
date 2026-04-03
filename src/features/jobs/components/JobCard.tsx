@@ -1,16 +1,18 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import type { JobDto } from "../types";
 
-export function JobCard({ job, action }: { job: JobDto; action?: ReactNode }) {
+function JobCardBase({ job, action }: { job: JobDto; action?: ReactNode }) {
   return (
-    <article className="rounded-lg bg-white p-4 shadow-sm transition hover:shadow">
+    <article className="card p-4 transition hover:shadow">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="font-semibold">{job.title}</h3>
           <p className="mt-1 text-sm text-slate-600">{job.Company?.name ?? "Company"}</p>
           <p className="mt-2 line-clamp-2 text-sm text-slate-700">{job.description}</p>
-          <p className="mt-2 text-xs text-slate-500">{job.location} • Salary: {job.salary}</p>
+          <p className="mt-2 text-xs text-slate-500">
+            {job.location} | Salary: {new Intl.NumberFormat("en-IN").format(job.salary)}
+          </p>
         </div>
 
         <div className="flex flex-col items-end gap-2">
@@ -23,3 +25,17 @@ export function JobCard({ job, action }: { job: JobDto; action?: ReactNode }) {
     </article>
   );
 }
+
+function JobCardSkeletonBase() {
+  return (
+    <article className="card space-y-3 p-4">
+      <div className="h-4 w-1/3 animate-pulse rounded bg-slate-200" />
+      <div className="h-3 w-1/4 animate-pulse rounded bg-slate-200" />
+      <div className="h-3 w-full animate-pulse rounded bg-slate-200" />
+      <div className="h-3 w-2/3 animate-pulse rounded bg-slate-200" />
+    </article>
+  );
+}
+
+export const JobCard = memo(JobCardBase);
+export const JobCardSkeleton = memo(JobCardSkeletonBase);

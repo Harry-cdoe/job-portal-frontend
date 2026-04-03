@@ -26,8 +26,13 @@ function buildJobsQueryParams(filters: JobsFilters) {
 
 export async function fetchJobs(params: JobsFilters) {
   const query = buildJobsQueryParams(params);
-  const { data } = await http.get<PaginatedListResponse<JobDto>>("/job", { params: query });
-  return data;
+  try {
+    const { data } = await http.get<PaginatedListResponse<JobDto>>("/api/jobs", { params: query });
+    return data;
+  } catch {
+    const { data } = await http.get<PaginatedListResponse<JobDto>>("/job", { params: query });
+    return data;
+  }
 }
 
 // Backend currently has no /api/job/:id endpoint. This fallback keeps the UI functional

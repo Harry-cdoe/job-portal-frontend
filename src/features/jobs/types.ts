@@ -11,6 +11,8 @@ export type JobDto = {
   description: string;
   location: string;
   salary: number;
+  experienceLevel?: "intern" | "junior" | "mid" | "senior" | "lead";
+  jobType?: "full_time" | "part_time" | "contract" | "internship" | "remote";
   companyId: number;
   createdAt?: string;
   updatedAt?: string;
@@ -20,14 +22,18 @@ export type JobDto = {
 export type JobsFilters = {
   page?: number;
   limit?: number;
-  sortBy?: "createdAt" | "title" | "salary" | "location";
+  sortBy?: "createdAt" | "salary" | "relevance";
   sortOrder?: "ASC" | "DESC";
   location?: string;
   title?: string;
   search?: string;
   minSalary?: number;
   maxSalary?: number;
+  experienceLevel?: "intern" | "junior" | "mid" | "senior" | "lead";
+  jobType?: "full_time" | "part_time" | "contract" | "internship" | "remote";
 };
+
+export type JobsSortValue = "newest" | "salary_desc" | "salary_asc" | "relevance";
 
 export type CreateJobRequestDto = {
   title: string;

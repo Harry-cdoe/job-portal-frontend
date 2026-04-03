@@ -8,6 +8,8 @@ export function useJobs(filters: JobsFilters) {
     queryKey: queryKeys.jobs.list(filters),
     queryFn: () => fetchJobs(filters),
     staleTime: 60_000,
+    gcTime: 5 * 60_000,
     placeholderData: (previousData) => previousData,
+    refetchOnWindowFocus: false,
   });
 }
